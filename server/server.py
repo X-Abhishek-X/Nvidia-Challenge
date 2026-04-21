@@ -12,19 +12,23 @@ class GPUOrchestratorService(gpu_metrics_pb2_grpc.GPUOrchestratorServicer):
         console.print("📡 [bold cyan]New Telemetry Stream Established[/bold cyan]")
         
         for metric in request_iterator:
-            # High Performance Orchestration Logic (Simulation)
-            # This is where a real cluster drain would happen
-            if metric.temperature > 88:
-                console.print(f"🚨 [bold red]CRITICAL EVENT:[/bold red] Node {metric.node_id} GPU {metric.gpu_uuid} overheating ({metric.temperature:.1f}C)!")
-                console.print(f"🔄 [yellow]ACTION:[/yellow] Initiating Kubernetes Node Drain for {metric.node_id}...")
-            elif metric.vram_used > (metric.vram_total * 0.9):
-                console.print(f"💡 [yellow]ADVISORY:[/yellow] Node {metric.node_id} is running low on VRAM.")
+            try:
+                # High Performance Orchestration Logic (Simulation)
+                # This is where a real cluster drain would happen
+                if metric.temperature > 88:
+                    console.print(f"🚨 [bold red]CRITICAL EVENT:[/bold red] Node {metric.node_id} GPU {metric.gpu_uuid} overheating ({metric.temperature:.1f}C)!")
+                    console.print(f"🔄 [yellow]ACTION:[/yellow] Initiating Kubernetes Node Drain for {metric.node_id}...")
+                elif metric.vram_used > (metric.vram_total * 0.9):
+                    console.print(f"💡 [yellow]ADVISORY:[/yellow] Node {metric.node_id} is running low on VRAM.")
 
-            # Return a simple health ACK
-            yield gpu_metrics_pb2.GPUMetricsResponse(
-                status="OK",
-                message=f"Metrics for {metric.gpu_uuid} logged."
-            )
+                # Return a simple health ACK
+                yield gpu_metrics_pb2.GPUMetricsResponse(
+                    status="OK",
+                    message=f"Metrics for {metric.gpu_uuid} logged."
+                )
+            except Exception as e:
+                console.print(f"⚠️  [yellow]Metric processing error:[/yellow] {e}")
+                continue
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
