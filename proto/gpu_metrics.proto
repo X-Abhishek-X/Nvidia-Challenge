@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package gpu_orchestrator;
+
+service GPUOrchestrator {
+    // Bidirectional streaming: agent sends metrics, orchestrator acks each one
+    rpc StreamMetrics(stream GPUMetricsRequest) returns (stream GPUMetricsResponse);
+    rpc DispatchAction(GPUMetricsRequest) returns (ActionResponse);
+}
+
+message GPUMetricsRequest {
+    string node_id    = 1;
+    string gpu_uuid   = 2;
+    float  temperature = 3;
+    float  power_draw  = 4;
+    float  vram_used   = 5;
+    float  vram_total  = 6;
+}
+
+message GPUMetricsResponse {
+    string status  = 1;
+    string message = 2;
+}
+
+message ActionResponse {
+    string action      = 1;
+    string target_node = 2;
+}
